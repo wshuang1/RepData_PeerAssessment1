@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 ## Introduction
 
@@ -29,7 +24,8 @@ and include the number of steps taken in 5 minute intervals each day.
 ## Loading and preprocessing the data
 
 ### Download and unzip, load the data to activity.
-```{r Loda Data, echo=TRUE}
+
+```r
 tmp <- tempfile()
 download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip", tmp, mode="wb", method="curl")
 unzip(tmp, "activity.csv")
@@ -39,42 +35,86 @@ activity <- read.table("activity.csv", sep=",", header=T)
 ## What is mean total number of steps taken per day?
 
 ** Use aggregate funciton to get the total steps **
-```{r total step, echo=TRUE}
+
+```r
 summary(activity)
+```
+
+```
+##      steps                date          interval     
+##  Min.   :  0.00   2012-10-01:  288   Min.   :   0.0  
+##  1st Qu.:  0.00   2012-10-02:  288   1st Qu.: 588.8  
+##  Median :  0.00   2012-10-03:  288   Median :1177.5  
+##  Mean   : 37.38   2012-10-04:  288   Mean   :1177.5  
+##  3rd Qu.: 12.00   2012-10-05:  288   3rd Qu.:1766.2  
+##  Max.   :806.00   2012-10-06:  288   Max.   :2355.0  
+##  NA's   :2304     (Other)   :15840
+```
+
+```r
 tolSteps <- aggregate(steps ~ date, data = activity, sum, na.rm = TRUE)
 mean_steps <- mean(tolSteps$steps)
 median_steps <- median(tolSteps$steps)
 
 cat ("Mean Step = ", mean_steps)
-cat ("Median Step = ", median_steps)
-
-hist(tolSteps$steps,col="green",main="Total Steps per day",xlab="Total Steps per day",cex.axis=1,cex.lab = 1)
+```
 
 ```
+## Mean Step =  10766.19
+```
+
+```r
+cat ("Median Step = ", median_steps)
+```
+
+```
+## Median Step =  10765
+```
+
+```r
+hist(tolSteps$steps,col="green",main="Total Steps per day",xlab="Total Steps per day",cex.axis=1,cex.lab = 1)
+```
+
+![](PA1_template_files/figure-html/total step-1.png)<!-- -->
 
 ## What is the average daily activity pattern?
 
 ** Use 5 minutes interval to analysis the data
-```{r 5 min, echo=TRUE}
+
+```r
 steps_5m <- aggregate(steps ~ interval, data = activity, mean, na.rm = TRUE)
 
 plot(steps ~ interval, data = steps_5m, type = "l", xlab = "5 mins intervals", ylab = "Mean number of steps taken (Day)", main = "Average number of steps at 5 minute intervals",  col = "green")
 ```
 
+![](PA1_template_files/figure-html/5 min-1.png)<!-- -->
+
 ** Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
-```{r, echo=TRUE}
+
+```r
 maxSteps <- steps_5m [which.max(steps_5m$steps),"interval"]
 maxSteps
+```
+
+```
+## [1] 835
 ```
 
 ## Imputing missing values
 
 ** Calculate and report the total number of missing values in the dataset
-```{r, echo=TRUE}
+
+```r
 missing_val <- sum(!complete.cases(activity))
 missing_val
+```
 
+```
+## [1] 2304
+```
+
+```r
 ## Function returns the mean steps for a given interval
 getMeanStepsPerInterval <- function(interval){
     steps_5m[steps_5m$interval==interval,"steps"]
@@ -93,18 +133,26 @@ for (i in 1:nrow(new_activity)) {
 }
 
 cat ("Fill in missing row = ", count)
+```
 
+```
+## Fill in missing row =  2304
+```
+
+```r
 ## Draw the histogram
 
 steps_perdays <- aggregate(steps ~ date, data = new_activity, sum)
 hist(steps_perdays$steps, col = "green", xlab = "Total Steps", 
      ylab = "Frequency", main = "Total Number of steps taken each day")
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r, echo=TRUE}
+
+```r
 # Now split up the data so that it's sorted by weekday or weekend
 # Use POSIXlt class so wday is part of this class wday is an integer ranging from 0 to 6 
 # that represents the day of the week 0 is for Sunday, 1 is for Monday, going up to 6 for Saturday
@@ -122,5 +170,6 @@ library(lattice)
 
 new_steps= aggregate(steps ~ interval + day, new_activity, mean)
 xyplot(steps ~ interval | factor(day), data = new_steps, aspect = 1/2, type = "l")
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
